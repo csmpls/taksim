@@ -92,6 +92,8 @@ var loadLists = function(){
 
 					var pjs = Processing.getInstanceById("taskcanvas");
 
+					pjs.clearTasks()
+					
 					$.each(listItem.taskseries, function(index, task){
 						pjs.addTask(task.name)	
 
@@ -131,6 +133,10 @@ void draw() {
 
 void addTask(String task_name) {
 	tasks.add(new Task(task_name));
+}
+
+void clearTasks() {
+	tasks = new ArrayList<Task>();
 }
 
 public class Task {
