@@ -1,49 +1,31 @@
 <!doctype html>
 <html>
-<head>
-	<title>rtm-js example</title>
-	<style>
+  <head>
+    <link href="/css/style.css" rel="stylesheet" type="text/css">
 
-		body {
-			background:#000;
-			color:#ccc;
-			font-family: sans-serif;
-			font-size:10pt;
-		}
 
-		button {
-			display: block;
-			width: 50px;
-			color: #ccc;
-			background-color:#333;
-			border: 1px solid #333;
-			padding: 10px;
-		}
+    <script type="text/javascript">
+    
+    function resizeCanvas()
+    {
+        Processing.getInstanceById("taskcanvas").size(window.innerWidth, window.innerHeight);
+    }
+    </script>
 
-		button#auth {
-			width: 300px;
-		}
 
-		#lists {
-			float: left;
-			width: 100px;
-		}
 
-		#tasks {
-			float: left;
-		}
 
-		.task-div {
-			padding: 5px;
-		}
-	</style>
-</head>
-<body>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-<script type="text/javascript" src="http://www.myersdaily.org/joseph/javascript/md5.js"></script>
-<script type="text/javascript" src="rtm.js"></script>
+    </head>
+  	<body onresize="resizeCanvas();" style="margin: 0;padding: 0;">
 
-<script type="text/javascript">
+  		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+		<script src="http://cloud.github.com/downloads/processing-js/processing-js/processing-1.4.1.js"></script>
+		<script type="text/javascript" src="http://www.myersdaily.org/joseph/javascript/md5.js"></script>
+		<script type="text/javascript" src="rtm.js"></script>
+
+		<script type="text/javascript">
+
+
 $(document).ready(function(){
 	var api_key = '7c23ed1a5859cb852a5a09c3047325f6',
 	    api_secret = '4bbb37c4885966bb',
@@ -77,6 +59,10 @@ $(document).ready(function(){
 	})
 });
 
+
+
+
+
 var loadLists = function(){
 	$('#auth').hide();
 
@@ -105,12 +91,13 @@ var loadLists = function(){
 						listItem.taskseries = [listItem.taskseries];
 					}
 
-					$.each(listItem.taskseries, function(index, task){
-						var div = $('<div>').addClass('task-div');
-						$('<input>').attr('type', 'checkbox').appendTo(div);
-						$('<span>').html(task.name).appendTo(div);
+					var pjs = Processing.getInstanceById("taskcanvas");
 
-						div.appendTo($('#tasks'));
+					pjs.clearTasks()
+
+					$.each(listItem.taskseries, function(index, task){
+						pjs.addTask(task.name)	
+
 					})
 				});
 			})
@@ -118,10 +105,65 @@ var loadLists = function(){
 	});
 }
 </script>
+</script>
+
+<script type="text/processing" data-processing-target="taskcanvas">
+
+ArrayList tasks = new ArrayList<Task>();
+
+void setup()
+{
+  size(screenWidth,screenHeight);
+  PFont fontA = loadFont("courier");
+  textFont(fontA, 9);   
+}
+
+void draw() {
+
+	background(0);
+	
+	int y = 40;
+
+	for (int i =0; i < tasks.size(); i++) {
+		t = tasks.get(i);
+		t.draw(40, y);
+		y+=40; 
+	}
+}
+
+void addTask(String task_name) {
+	tasks.add(new Task(task_name));
+}
+
+void clearTasks() {
+	tasks = new ArrayList<Task>();
+}
+
+public class Task {
+	String name;
+
+	Task(String _name) {
+		name = _name;
+	}
+
+	void draw(int x, int y) {
+		fill(255);
+		text(name,x,y);
+	}
+}
+
+</script>
 
 <button id="auth" disabled="disabled">Login with Remember The Milk!</button>
 
 <div id="lists"></div>
 <div id="tasks"></div>
 
-</body></html>
+ 
+ <canvas id="taskcanvas" width="800px" height="300" ></canvas>
+
+
+
+  	</body>
+
+</html>
