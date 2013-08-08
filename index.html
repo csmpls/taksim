@@ -122,17 +122,24 @@ void draw() {
 
 	background(0);
 	pad = 40;
-	
+
+
+
+  // scroll tasks down side	
   int y = tasks.size() * -30;
   for (int i = 0; i < tasks.size(); i++) {
     t = tasks.get(i);
-    t.draw(pad,scroll+y);
+    t.draw(pad,scroll+y)
     y+=30;
   }   
   scroll++;
 
+
+
+  // check if topmost task is at bottom of the screen
   if (tasks.size() * -30 + scroll > height) {
     scroll = 0;
+    tasks = shuffle(tasks);
   }
 
 }
@@ -143,6 +150,22 @@ void addTask(String task_name) {
 
 void clearTasks() {
 	tasks = new ArrayList<Task>();
+}
+
+//shuffles list in-place
+ArrayList shuffle(ArrayList list) {
+  int i, j;
+  Task t;
+  for (i = 1; i < list.size(); i++) {
+    randomSeed(millis());
+    j = (int)random(0,i+1);  // choose j in [0..i]
+    if (j != i) {
+      t = (Task)list.get(i);                        // swap list[i] and list[j]
+      list.set(i, list.get(j));
+      list.set(j, t);
+    }
+  }
+  return list;
 }
 
 public class Task {
