@@ -110,25 +110,31 @@ var loadLists = function(){
 <script type="text/processing" data-processing-target="taskcanvas">
 
 ArrayList tasks = new ArrayList<Task>();
+int scroll = 0;
 
 void setup()
 {
   size(screenWidth,screenHeight);
-  PFont fontA = loadFont("courier");
-  textFont(fontA, 24);   
+
 }
 
 void draw() {
 
 	background(0);
+	pad = screenWidth*.15;
 	
-	int y = 40;
+  int y = tasks.size() * -30;
+  for (int i = 0; i < tasks.size(); i++) {
+    t = tasks.get(i);
+    t.draw(pad,scroll+y);
+    y+=30;
+  }   
+  scroll++;
 
-	for (int i =0; i < tasks.size(); i++) {
-		t = tasks.get(i);
-		t.draw(40, y);
-		y+=40; 
-	}
+  if (tasks.size() * -30 + scroll > height) {
+    scroll = 0;
+  }
+
 }
 
 void addTask(String task_name) {
