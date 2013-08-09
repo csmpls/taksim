@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <link href="/css/style.css" rel="stylesheet" type="text/css">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
 
 
     <script type="text/javascript">
@@ -117,15 +117,23 @@ ArrayList<String> urgents = new ArrayList<String>();
 String current_urgents[];
 int last_urgent = 0;
 
+/* @pjs font="Cantarell.ttf"; */
+color bg_color = color(12,12,13);
+color scroll_color = color(112);
+color urgent_color = color(161,10,28);
+int scroll_speed = .5;
+
 void setup()
 {
   size(screenWidth,screenHeight);
+  textFont(createFont("Cantarell", 23))
+
 }
 
 void draw() {
 
-	background(0);
-	pad = 30;
+	background(bg_color);
+	pad = 40;
 
 
   // scroll tasks down side	
@@ -135,17 +143,18 @@ void draw() {
     t.draw(pad,scroll+y)
     y+=30;
   }   
-  scroll++;
+  scroll+=scroll_speed;
 
 
   // display urgent tasks 
 	try{
 
-	int u_y = screenHeight/2-48;
+	int u_y = (screenHeight*.3);
+	int u_x = (screenWidth*.35);
 	for (int i = 0; i<current_urgents.length; i++) {
-	    fill(255,0,0);
-	    textSize(26);
-	    text(current_urgents[i], 350, u_y);
+	    fill(urgent_color);
+	    textSize(32);
+	    text(current_urgents[i], u_x, u_y);
 	    u_y +=48;
 	  }
 	}
@@ -235,8 +244,18 @@ public class Task {
 	}
 
 	void draw(int x, int y) {
-		fill(192);
-		text(name,x,y);
+		fill(scroll_color);
+		textSize(12);
+		String shown = truncate(name);
+		text(shown,x,y);
+	}
+
+	String truncate (String s) {
+		int max_chars = 48;  // the maximum chars to be displayed in scrolling view
+		if (s.length > max_chars) {
+			return s.substring(0,max_chars) + "...";
+		}
+		return s;
 	}
 }
 

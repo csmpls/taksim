@@ -1,0 +1,14 @@
+body {
+	background:#0C0C0D;
+	color:#ccc;
+}
+
+button {
+	font-size: 9pt;
+	background:#333;
+	border: none;
+	padding:7px;
+	color:#ccc;
+} button:hover {
+	background:#888;
+}
