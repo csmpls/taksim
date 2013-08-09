@@ -99,6 +99,7 @@ var loadLists = function(){
 						pjs.addTask(task.name)	
 
 					})
+					pjs.setup_urgents()
 				});
 			})
 		})
@@ -112,17 +113,19 @@ var loadLists = function(){
 ArrayList tasks = new ArrayList<Task>();
 int scroll = 0;
 
+ArrayList<String> urgents = new ArrayList<String>();
+String current_urgents[];
+int last_urgent = 0;
+
 void setup()
 {
   size(screenWidth,screenHeight);
-
 }
 
 void draw() {
 
 	background(0);
-	pad = 40;
-
+	pad = 30;
 
 
   // scroll tasks down side	
@@ -134,6 +137,15 @@ void draw() {
   }   
   scroll++;
 
+
+  // // display urgent tasks 
+  // int u_y = 50;
+  // for (int i = 0; i<current_urgents.length; i++) {
+  //   fill(255,0,0);
+  //   textSize(24);
+  //   text(current_urgents[i], 350, u_y);
+  //   u_y +=48;
+  // }
 
 
   // check if topmost task is at bottom of the screen
@@ -150,6 +162,47 @@ void addTask(String task_name) {
 
 void clearTasks() {
 	tasks = new ArrayList<Task>();
+}
+
+void setup_urgents() {
+	for (int i = 0; i < tasks.size(); i++) {
+		urgents.add((String)tasks.get(i).name);
+	}
+
+	pick_current_urgents();
+}
+
+void pick_current_urgents() {
+	int l = (int)random(1,4);
+
+	current_urgents = new String[l];
+
+	// if we're about to overflow,
+	// save the rest of the list to current_urgents
+	// and reset
+	if (last_urgent + l >= urgents.size()) {
+    l = urgents.size() - last_urgent;
+    current_urgents = new String[l];
+
+    for (int i = 0; i < l; i++) {
+      current_urgents[i] = urgents.get(last_urgent+i);
+    }
+    
+    last_urgent = 0;
+    
+  } else {
+    for (int i = 0; i < l; i++) {
+      current_urgents[i] = urgents.get(last_urgent+i);
+    }
+  }
+
+  println(current_urgents.length);
+  
+  last_urgent += l;
+}
+
+void keyPressed() {
+  pick_current_urgents();
 }
 
 //shuffles list in-place
@@ -176,7 +229,7 @@ public class Task {
 	}
 
 	void draw(int x, int y) {
-		fill(255);
+		fill(192);
 		text(name,x,y);
 	}
 }
