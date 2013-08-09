@@ -138,23 +138,33 @@ void draw() {
   scroll++;
 
 
-  // // display urgent tasks 
-  // int u_y = 50;
-  // for (int i = 0; i<current_urgents.length; i++) {
-  //   fill(255,0,0);
-  //   textSize(24);
-  //   text(current_urgents[i], 350, u_y);
-  //   u_y +=48;
-  // }
+  // display urgent tasks 
+	try{
+
+	int u_y = screenHeight/2-48;
+	for (int i = 0; i<current_urgents.length; i++) {
+	    fill(255,0,0);
+	    textSize(26);
+	    text(current_urgents[i], 350, u_y);
+	    u_y +=48;
+	  }
+	}
+
+	catch(Exception e) { }
 
 
   // check if topmost task is at bottom of the screen
   if (tasks.size() * -30 + scroll > height) {
+  	//if it is, reset scroll to top
     scroll = 0;
+    //and pick the next tasks to display as urgent
+    pick_current_urgents();
+    // shuffle the tasks
     tasks = shuffle(tasks);
   }
 
 }
+
 
 void addTask(String task_name) {
 	tasks.add(new Task(task_name));
@@ -196,28 +206,24 @@ void pick_current_urgents() {
     }
   }
 
-  println(current_urgents.length);
   
   last_urgent += l;
 }
 
-void keyPressed() {
-  pick_current_urgents();
-}
-
 //shuffles list in-place
 ArrayList shuffle(ArrayList list) {
-  int i, j;
-  Task t;
-  for (i = 1; i < list.size(); i++) {
-    randomSeed(millis());
-    j = (int)random(0,i+1);  // choose j in [0..i]
-    if (j != i) {
-      t = (Task)list.get(i);                        // swap list[i] and list[j]
-      list.set(i, list.get(j));
-      list.set(j, t);
-    }
-  }
+	int i = list.size();
+	int t, r;
+
+	while (0 != i) {
+		r = (int)random(0,i);
+		i -= 1;
+
+		t = list.get(i);
+		list.set(i, list.get(r));
+		list.set(r, t);
+	}
+
   return list;
 }
 
