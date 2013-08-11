@@ -96,7 +96,7 @@ var loadLists = function(){
 					pjs.clearTasks()
 
 					$.each(listItem.taskseries, function(index, task){
-						pjs.addTask(task.name)	
+						pjs.addTask(task.name.toUpperCase()	)
 
 					})
 					pjs.setup_urgents()
@@ -117,16 +117,16 @@ ArrayList<String> urgents = new ArrayList<String>();
 String current_urgents[];
 int last_urgent = 0;
 
-/* @pjs font="Cantarell.ttf"; */
-color bg_color = color(12,12,13);
+/* @pjs font="OpenSans-Regular.ttf"; */
+color bg_color = color(255);
 color scroll_color = color(112);
-color urgent_color = color(161,10,28);
+color urgent_color = color(0);
 int scroll_speed = .5;
 
 void setup()
 {
   size(screenWidth,screenHeight);
-  textFont(createFont("Cantarell", 23))
+  textFont(createFont("OpenSans", 23))
 
 }
 
