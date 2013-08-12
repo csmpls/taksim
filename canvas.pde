@@ -4,12 +4,14 @@ int scroll = 0;
 ArrayList<String> urgents = new ArrayList<String>();
 String current_urgents[];
 int last_urgent = 0;
+float urgent_count = 0;
 
-/* @pjs font="regular.ttf", "light.ttf"; */
+/* @pjs font="OpenSans-Regular.ttf"*/
 color bg_color = color(255);
-color scroll_color = color(112);
+color scroll_color = color(125);
 color urgent_color = color(0);
 int scroll_speed = .5;
+float urgent_timer = 250; 
 
 PFont regular, light;
 
@@ -18,14 +20,24 @@ void setup()
   size(screenWidth,screenHeight);
   regular = createFont("regular", 23);
   light = createFont("light", 23);
-  textFont(regular);
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 void draw() {
 
 	background(bg_color);
-	pad = 40;
+	pad = screenWidth*.08;
 
 
   // scroll tasks down side	
@@ -38,28 +50,16 @@ void draw() {
   scroll+=scroll_speed;
 
 
-  // display urgent tasks 
-	try{
 
-	int u_y = (screenHeight*.3);
-	int u_x = (screenWidth*.35);
-	for (int i = 0; i<current_urgents.length; i++) {
-	    fill(urgent_color);
-	    textSize(32);
-	    text(current_urgents[i], u_x, u_y);
-	    u_y +=48;
-	  }
-	}
 
-	catch(Exception e) { }
+	handle_urgent_tasks();
+
 
 
   // check if topmost task is at bottom of the screen
   if (tasks.size() * -30 + scroll > height) {
   	//if it is, reset scroll to top
     scroll = 0;
-    //and pick the next tasks to display as urgent
-    pick_current_urgents();
     // shuffle the tasks
     tasks = shuffle(tasks);
   }
@@ -67,12 +67,85 @@ void draw() {
 }
 
 
-void addTask(String task_name) {
-	tasks.add(new Task(task_name));
+
+
+
+
+
+
+
+
+
+public class Task {
+	String name;	
+
+	Task(String _name) {
+		name = _name;
+	}
+
+	void draw(int x, int y) {
+		fill(scroll_color);
+		textSize(10);
+		textAlign(LEFT);
+		String shown = truncate(name);
+		text(shown,x,y);
+	}
+
+	String truncate (String s) {
+		int max_chars = 46;  // the maximum chars to be displayed in scrolling view
+		if (s.length > max_chars) {
+			return s.substring(0,max_chars) + "...";
+		}
+		return s;
+	}
 }
 
-void clearTasks() {
-	tasks = new ArrayList<Task>();
+
+
+
+
+
+
+
+
+
+
+
+
+
+void handle_urgent_tasks() {
+	
+	//check timer
+	urgent_count++;
+	if (urgent_count>urgent_timer) {
+		urgent_count=0;
+		pick_current_urgents();
+	}
+
+	try {
+
+		draw_urgent_tasks();
+
+	} catch (Exception e) {}
+
+}
+
+void draw_urgent_tasks() {
+
+	int ll = current_urgents.length;
+
+	int u_y = + (screenHeight*.34) - ll*50;
+	int urgents_width = screenWidth - (2*pad) - 350;
+	int u_x = pad+350;
+
+	for (int i = 0; i<ll; i++) {
+
+	    fill(urgent_color);
+	    //textAlign(CENTER);
+	    textSize(24);
+	    text(current_urgents[i], u_x, u_y,urgents_width, 400);//, urgents_width, screenHeigth-u_y);
+	    u_y +=48;
+	  }
 }
 
 void setup_urgents() {
@@ -128,25 +201,21 @@ ArrayList shuffle(ArrayList list) {
   return list;
 }
 
-public class Task {
-	String name;
 
-	Task(String _name) {
-		name = _name;
-	}
 
-	void draw(int x, int y) {
-		fill(scroll_color);
-		textSize(12);
-		String shown = truncate(name);
-		text(shown,x,y);
-	}
 
-	String truncate (String s) {
-		int max_chars = 48;  // the maximum chars to be displayed in scrolling view
-		if (s.length > max_chars) {
-			return s.substring(0,max_chars) + "...";
-		}
-		return s;
-	}
+
+
+
+
+
+
+
+void addTask(String task_name) {
+	tasks.add(new Task(task_name));
 }
+
+void clearTasks() {
+	tasks = new ArrayList<Task>();
+}
+
