@@ -9,17 +9,17 @@ float urgent_count = 0;
 /* @pjs font="OpenSans-Regular.ttf"*/
 color bg_color = color(255);
 color scroll_color = color(125);
-color urgent_color = color(0);
+color urgent_color = color(232,16,0);
 int scroll_speed = .5;
-float urgent_timer = 250; 
+float urgent_timer = 225; 
+int scroll_urgents_pad = 400;
 
 PFont regular, light;
 
 void setup()
 {
   size(screenWidth,screenHeight);
-  regular = createFont("regular", 23);
-  light = createFont("light", 23);
+  regular = createFont("OpenSans", 23);
 }
 
 
@@ -134,9 +134,9 @@ void draw_urgent_tasks() {
 
 	int ll = current_urgents.length;
 
-	int u_y = + (screenHeight*.34) - ll*50;
-	int urgents_width = screenWidth - (2*pad) - 350;
-	int u_x = pad+350;
+	int u_y = + (screenHeight*.36) - ll*25;
+	int urgents_width = screenWidth - (2*pad) - scroll_urgents_pad;
+	int u_x = pad+scroll_urgents_pad;
 
 	for (int i = 0; i<ll; i++) {
 
@@ -144,8 +144,17 @@ void draw_urgent_tasks() {
 	    //textAlign(CENTER);
 	    textSize(24);
 	    text(current_urgents[i], u_x, u_y,urgents_width, 400);//, urgents_width, screenHeigth-u_y);
-	    u_y +=48;
+
+	    u_y += get_urgent_spacing(u_x+urgents_width, current_urgents[i]);
 	  }
+}
+
+void get_urgent_spacing(int start_x, String str) {
+	float width = textWidth(str);
+	if (textWidth>screenWidth-start_x) {
+		return 2*48;
+	}
+	return 48;
 }
 
 void setup_urgents() {
