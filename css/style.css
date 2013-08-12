@@ -1,14 +1,14 @@
 body {
-	background:#0C0C0D;
-	color:#ccc;
+	background:#fff;
+	color:#aaa;
 }
 
 button {
 	font-size: 9pt;
-	background:#333;
+	background:#eee;
 	border: none;
 	padding:7px;
-	color:#ccc;
+	color:#aaa;
 } button:hover {
 	background:#888;
 }
