@@ -26,94 +26,95 @@
 		<script type="text/javascript">
 
 
-$(document).ready(function(){
-	var api_key = '7c23ed1a5859cb852a5a09c3047325f6',
-	    api_secret = '4bbb37c4885966bb',
-	    checkPopup,
-	    popup,
-	    token,
-	    frob;
+			$(document).ready(function(){
+				var api_key = '7c23ed1a5859cb852a5a09c3047325f6',
+				    api_secret = '4bbb37c4885966bb',
+				    checkPopup,
+				    popup,
+				    token,
+				    frob;
 
-	window.rtm = new RememberTheMilk(api_key, api_secret, 'delete');
+				window.rtm = new RememberTheMilk(api_key, api_secret, 'delete');
 
-	rtm.get('rtm.auth.getFrob', function(resp){
-		$('#auth').attr('disabled', null);
-		frob = resp.rsp.frob;
-	});
+				rtm.get('rtm.auth.getFrob', function(resp){
+					$('#auth').attr('disabled', null);
+					frob = resp.rsp.frob;
+				});
 
-	$('#auth').click(function(){
-		var authUrl = rtm.getAuthUrl(frob);
-		popup = window.open(authUrl);
+				$('#auth').click(function(){
+					var authUrl = rtm.getAuthUrl(frob);
+					popup = window.open(authUrl);
 
-		checkPopup = setInterval(function(){
-			if (popup.closed == true) {
-				clearInterval(checkPopup);
+					checkPopup = setInterval(function(){
+						if (popup.closed == true) {
+							clearInterval(checkPopup);
 
-				rtm.get('rtm.auth.getToken', {frob: frob}, function(resp){
-					rtm.auth_token = resp.rsp.auth.token;
+							rtm.get('rtm.auth.getToken', {frob: frob}, function(resp){
+								rtm.auth_token = resp.rsp.auth.token;
 
-					loadLists();
+								loadLists();
+							});
+						}
+					}, 200);
+				})
+			});
+
+
+
+
+
+			var loadLists = function(){
+				$('#auth').hide();
+
+				rtm.get('rtm.lists.getList', function(resp){
+					$.each(resp.rsp.lists.list, function(index, list){
+						$('<button>').html(list.name).data({
+							id: list.id
+						}).addClass('list')
+						.appendTo($('#lists'));
+					});
+
+					$('button.list').click(function(){
+						$('#tasks').html('Loading...');
+						var listId = $(this).data('id');
+
+						rtm.get('rtm.tasks.getList', {list_id: listId, filter: 'status:incomplete'}, function(resp){
+							$('#tasks').empty();
+
+							if (!resp.rsp.tasks || !resp.rsp.tasks.list) {
+								$('#tasks').html('No tasks!');
+								return;
+							}
+
+							$.each(resp.rsp.tasks.list, function(index, listItem){
+								if (Object.prototype.toString.call(listItem.taskseries) != '[object Array]') {
+									listItem.taskseries = [listItem.taskseries];
+								}
+
+								var pjs = Processing.getInstanceById("taskcanvas");
+
+								pjs.clearTasks()
+
+								$.each(listItem.taskseries, function(index, task){
+									pjs.addTask(task.name.toUpperCase()	)
+
+								})
+								pjs.setup_urgents()
+							});
+						})
+					})
 				});
 			}
-		}, 200);
-	})
-});
-
-
-
-
-
-var loadLists = function(){
-	$('#auth').hide();
-
-	rtm.get('rtm.lists.getList', function(resp){
-		$.each(resp.rsp.lists.list, function(index, list){
-			$('<button>').html(list.name).data({
-				id: list.id
-			}).addClass('list')
-			.appendTo($('#lists'));
-		});
-
-		$('button.list').click(function(){
-			$('#tasks').html('Loading...');
-			var listId = $(this).data('id');
-
-			rtm.get('rtm.tasks.getList', {list_id: listId, filter: 'status:incomplete'}, function(resp){
-				$('#tasks').empty();
-
-				if (!resp.rsp.tasks || !resp.rsp.tasks.list) {
-					$('#tasks').html('No tasks!');
-					return;
-				}
-
-				$.each(resp.rsp.tasks.list, function(index, listItem){
-					if (Object.prototype.toString.call(listItem.taskseries) != '[object Array]') {
-						listItem.taskseries = [listItem.taskseries];
-					}
-
-					var pjs = Processing.getInstanceById("taskcanvas");
-
-					pjs.clearTasks()
-
-					$.each(listItem.taskseries, function(index, task){
-						pjs.addTask(task.name.toUpperCase()	)
-
-					})
-					pjs.setup_urgents()
-				});
-			})
-		})
-	});
-}
-</script>
+			</script>
 </script>
 
-<script type="text/processing" data-processing-target="taskcanvas" ></script>
 
 <button id="auth" disabled="disabled">Login with Remember The Milk!</button>
 
-<div id="lists"></div>
-<div id="tasks"></div>
+<div class="lists" id = "lists"></div>
+
+
+
 
  
  <canvas id="taskcanvas" width="800px" height="300" data-processing-sources="canvas.pde" ></canvas>

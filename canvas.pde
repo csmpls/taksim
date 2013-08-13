@@ -9,10 +9,11 @@ float urgent_count = 0;
 /* @pjs font="OpenSans-Regular.ttf"*/
 color bg_color = color(255);
 color scroll_color = color(125);
-color urgent_color = color(232,16,0);
+color urgent_color = color(0);
 int scroll_speed = .5;
-float urgent_timer = 225; 
+float urgent_timer = 275; 
 int scroll_urgents_pad = 400;
+float flip = 1;
 
 PFont regular, light;
 
@@ -20,6 +21,7 @@ void setup()
 {
   size(screenWidth,screenHeight);
   regular = createFont("OpenSans", 23);
+  frameRate(52);
 }
 
 
@@ -37,7 +39,7 @@ void setup()
 void draw() {
 
 	background(bg_color);
-	pad = screenWidth*.08;
+	pad = screenWidth*.32;
 
 
   // scroll tasks down side	
@@ -53,8 +55,6 @@ void draw() {
 
 
 	handle_urgent_tasks();
-
-
 
   // check if topmost task is at bottom of the screen
   if (tasks.size() * -30 + scroll > height) {
@@ -91,13 +91,6 @@ public class Task {
 		text(shown,x,y);
 	}
 
-	String truncate (String s) {
-		int max_chars = 46;  // the maximum chars to be displayed in scrolling view
-		if (s.length > max_chars) {
-			return s.substring(0,max_chars) + "...";
-		}
-		return s;
-	}
 }
 
 
@@ -115,47 +108,114 @@ public class Task {
 
 void handle_urgent_tasks() {
 	
-	//check timer
-	urgent_count++;
-	if (urgent_count>urgent_timer) {
-		urgent_count=0;
-		pick_current_urgents();
+	if (current_urgents) {
+		
+		//check timer
+		urgent_count++;
+		if (urgent_count>urgent_timer) {
+			urgent_count=0;
+			pick_current_urgents();
+			flip++;
+		}
+
+
+		if (current_urgents.length>0)
+			draw_urgent_tasks();
+
 	}
-
-	try {
-
-		draw_urgent_tasks();
-
-	} catch (Exception e) {}
-
 }
 
 void draw_urgent_tasks() {
 
-	int ll = current_urgents.length;
+	float xmid = halfScreenWidth();
+	float ythird = thirdScreenHeight();
 
-	int u_y = + (screenHeight*.36) - ll*25;
-	int urgents_width = screenWidth - (2*pad) - scroll_urgents_pad;
-	int u_x = pad+scroll_urgents_pad;
 
-	for (int i = 0; i<ll; i++) {
+	// switches in between two configurations for the x points
+	if (flip %2) {
+		float x1 = xmid - midpoint(xmid);
+		float x2 = xmid + midpoint(xmid);
+	} else {
+		float x1 = xmid + midpoint(xmid);
+		float x2 = xmid - midpoint(xmid);
+	} 
 
-	    fill(urgent_color);
-	    //textAlign(CENTER);
-	    textSize(24);
-	    text(current_urgents[i], u_x, u_y,urgents_width, 400);//, urgents_width, screenHeigth-u_y);
+	// get the y points for each
+	float y1 = midpoint(ythird*1.25);
+	float y2 = midpoint(ythird*2.7);
+	float y3 = midpoint(ythird*4.25);
 
-	    u_y += get_urgent_spacing(u_x+urgents_width, current_urgents[i]);
-	  }
+	
+	// we have to try/catch them in case there are fewer than 3 
+	// items to display
+
+	//first big task
+   	draw_big_text(current_urgents[0], x1, y1, 10, 60);
+
+
+   	//second big task
+	try { 
+    	draw_big_text(current_urgents[1], x2, y2, 40, 40);
+  	} catch(Exception e) {} 
+
+
+  	//third big task
+	try { 
+    	draw_big_text(current_urgents[2], x1, y3, 60, 20);
+  	} catch(Exception e) {} 
+
+	  
 }
 
-void get_urgent_spacing(int start_x, String str) {
-	float width = textWidth(str);
-	if (textWidth>screenWidth-start_x) {
-		return 2*48;
+// Text is centered - so (x, y) here is the midpoint of the text we will draw
+// _delay is the time until the text is displayed
+// _exit is the time before maximum at which it disappears
+void draw_big_text(String string, int x, int y, int _delay, int _exit) {
+	
+	string = truncate(string);
+
+
+
+	float opacity = 255;
+	float x_distort = 0;
+
+	// _delay is the time until the text is displayed
+	if (urgent_count < _delay) {
+		opacity = map(urgent_count, 0, _delay, 0, 250);
 	}
-	return 48;
+	// _exit is the time before maximum at which it disappears
+	else if (_exit > abs(urgent_timer-urgent_count)) {
+		opacity = map(urgent_count, urgent_timer-_exit, urgent_timer, 255, 10);
+		x_distort = map(urgent_count, urgent_timer-_exit, urgent_timer, 0, 4);
+	}
+
+	fill(urgent_color, opacity);
+	textAlign(CENTER);
+	textSize(pick_big_font_size(string, _delay));
+	text(string, x+x_distort, y);
+	
 }
+
+void pick_big_font_size(String s, int _delay) {
+		
+	if (s.length > 30)
+		return 18;
+	return 26;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void setup_urgents() {
 	for (int i = 0; i < tasks.size(); i++) {
@@ -166,7 +226,7 @@ void setup_urgents() {
 }
 
 void pick_current_urgents() {
-	int l = (int)random(1,4);
+	int l = 3; 
 
 	current_urgents = new String[l];
 
@@ -193,6 +253,17 @@ void pick_current_urgents() {
   last_urgent += l;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 //shuffles list in-place
 ArrayList shuffle(ArrayList list) {
 	int i = list.size();
@@ -209,6 +280,33 @@ ArrayList shuffle(ArrayList list) {
 
   return list;
 }
+
+	String truncate (String s) {
+		int max_chars = 46;  // the maximum chars to be displayed in scrolling view
+		if (s.length > max_chars) {
+			return s.substring(0,max_chars) + "...";
+		}
+		return s;
+	}
+
+
+
+
+
+float midpoint(float x) {
+	return x/2;
+}
+
+float halfScreenWidth() {
+	return screenWidth/2;
+}
+
+float thirdScreenHeight() {
+	return screenHeight/3;
+}
+
+
+
 
 
 
