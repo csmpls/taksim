@@ -155,13 +155,13 @@ void draw_urgent_tasks() {
 
    	//second big task
 	try { 
-    	draw_big_text(current_urgents[1], x2, y2, 40, 40);
+    	draw_big_text(current_urgents[1], x2, y2, 40, 50);
   	} catch(Exception e) {} 
 
 
   	//third big task
 	try { 
-    	draw_big_text(current_urgents[2], x1, y3, 60, 20);
+    	draw_big_text(current_urgents[2], x1, y3, 60, 40);
   	} catch(Exception e) {} 
 
 	  
@@ -179,14 +179,16 @@ void draw_big_text(String string, int x, int y, int _delay, int _exit) {
 	float opacity = 255;
 	float x_distort = 0;
 
+	float fadeout_time = 30;
+
 	// _delay is the time until the text is displayed
 	if (urgent_count < _delay) {
 		opacity = map(urgent_count, 0, _delay, 0, 250);
 	}
 	// _exit is the time before maximum at which it disappears
 	else if (_exit > abs(urgent_timer-urgent_count)) {
-		opacity = map(urgent_count, urgent_timer-_exit, urgent_timer, 255, 10);
-		x_distort = map(urgent_count, urgent_timer-_exit, urgent_timer, 0, 4);
+		opacity = map(urgent_count, urgent_timer-_exit, urgent_timer-_exit+fadeout_time, 255, 10);
+		x_distort = map(urgent_count, urgent_timer-_exit, urgent_timer-_exit+fadeout_time, 0, 4);
 	}
 
 	fill(urgent_color, opacity);
