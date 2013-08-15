@@ -50,7 +50,7 @@ button {
 	padding-left:25%;
 	padding-right:25%;
 	display: none;
-	overflow: none;
+	overflow: hidden;
 	background: #333;
 	color: #eee;
 
@@ -92,30 +92,21 @@ button {
 	     -o-transition: opacity 0.4s ease 0.4s;
 	        transition: opacity 0.4s ease 0.4s;
 }
-	.meny-left .meny-arrow {
-		left: 14px;
-		top: 50%;
-		margin-top: -16px;
-		border-left: 16px solid #333;
-	}
-	.meny-right .meny-arrow {
-		right: 14px;
-		top: 50%;
-		margin-top: -16px;
-		border-right: 16px solid #333;
-	}
+
 	.meny-top .meny-arrow {
 		left: 50%;
 		top: 14px;
 		margin-left: -16px;
-		border-top: 16px solid #aaa;
+		border-top: 16px solid #eee;
 	}
-	.meny-bottom .meny-arrow {
+
+	.meny-top .meny-arrow:hover{
 		left: 50%;
-		bottom: 14px;
+		top: 14px;
 		margin-left: -16px;
-		border-bottom: 16px solid #333;
+		border-top: 16px solid #000;
 	}
+
 	.meny-active .meny-arrow {
 		opacity: 0.4;
 

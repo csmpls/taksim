@@ -6,21 +6,45 @@ String current_urgents[];
 int last_urgent = 0;
 float urgent_count = 0;
 
-/* @pjs font="OpenSans-Regular.ttf"*/
+/* @pjs font="OpenSans-Regular.ttf", font="Miso.otf"*/
 color bg_color = color(255);
 color scroll_color = color(125);
-color urgent_color = color(0);
 int scroll_speed = .5;
 float urgent_timer = 275; 
 int scroll_urgents_pad = 400;
 float flip = 1;
+int urgent_text_opacity = 128;
 
-PFont regular, light;
+
+color[] urgents_palette = {
+	color(23,255,131),
+	color(42,211,232),
+	color(97,147,255),
+	color(172,99,232),
+	color(255,55,146)
+};
+
+// for below - see pick_urgents_colors()
+color urg_col[]; //array of colors currently used for urgent tasks
+int cur_col = 0; //current color of urgents[] swab
+
+
+
+PFont regular, miso;
+
+
+
+
+
+
+
 
 void setup()
 {
   size(screenWidth,screenHeight);
   regular = createFont("OpenSans", 23);
+  miso = createFont("Miso", 60);
+  urg_col = pick_urgents_colors();
   frameRate(52);
 }
 
@@ -39,20 +63,17 @@ void setup()
 void draw() {
 
 	background(bg_color);
-	pad = screenWidth*.32;
+	pad = screenWidth*.48;
 
 
   // scroll tasks down side	
   int y = tasks.size() * -30;
   for (int i = 0; i < tasks.size(); i++) {
     t = tasks.get(i);
-    t.draw(pad,scroll+y)
+    t.draw(pad,scroll+y);
     y+=30;
   }   
   scroll+=scroll_speed;
-
-
-
 
 	handle_urgent_tasks();
 
@@ -85,9 +106,10 @@ public class Task {
 
 	void draw(int x, int y) {
 		fill(scroll_color);
+		textFont(regular);
 		textSize(10);
-		textAlign(LEFT);
-		String shown = truncate(name);
+		textAlign(RIGHT);
+		String shown = truncate(name, 42);
 		text(shown,x,y);
 	}
 
@@ -115,6 +137,7 @@ void handle_urgent_tasks() {
 		if (urgent_count>urgent_timer) {
 			urgent_count=0;
 			pick_current_urgents();
+			urg_col = pick_urgents_colors();
 			flip++;
 		}
 
@@ -149,19 +172,25 @@ void draw_urgent_tasks() {
 	// we have to try/catch them in case there are fewer than 3 
 	// items to display
 
+
+	textFont(miso);
+
 	//first big task
-   	draw_big_text(current_urgents[0], x1, y1, 10, 60);
+	fill(urg_col[0], urgent_text_opacity);
+   	draw_big_text(current_urgents[0], x1, y1, 10, 60, urg_col[0]);
 
 
    	//second big task
 	try { 
-    	draw_big_text(current_urgents[1], x2, y2, 40, 50);
+		fill(urg_col[1], urgent_text_opacity);
+    	draw_big_text(current_urgents[1], x2, y2, 40, 50, urg_col[1]);
   	} catch(Exception e) {} 
 
 
   	//third big task
 	try { 
-    	draw_big_text(current_urgents[2], x1, y3, 60, 40);
+		
+    	draw_big_text(current_urgents[2], x1, y3, 60, 40, urg_col[2]);
   	} catch(Exception e) {} 
 
 	  
@@ -170,39 +199,47 @@ void draw_urgent_tasks() {
 // Text is centered - so (x, y) here is the midpoint of the text we will draw
 // _delay is the time until the text is displayed
 // _exit is the time before maximum at which it disappears
-void draw_big_text(String string, int x, int y, int _delay, int _exit) {
+void draw_big_text(String string, int x, int y, int _delay, int _exit, color color) {
 	
-	string = truncate(string);
+	string = truncate(string,32);
 
-
-
-	float opacity = 255;
 	float x_distort = 0;
 
 	float fadeout_time = 30;
 
+	float opacity = urgent_text_opacity;
+
 	// _delay is the time until the text is displayed
 	if (urgent_count < _delay) {
-		opacity = map(urgent_count, 0, _delay, 0, 250);
+		opacity = map(urgent_count, 0, _delay, 0, urgent_text_opacity);
 	}
 	// _exit is the time before maximum at which it disappears
 	else if (_exit > abs(urgent_timer-urgent_count)) {
-		opacity = map(urgent_count, urgent_timer-_exit, urgent_timer-_exit+fadeout_time, 255, 10);
+		opacity = map(urgent_count, urgent_timer-_exit, urgent_timer-_exit+fadeout_time, urgent_text_opacity, 10);
 		x_distort = map(urgent_count, urgent_timer-_exit, urgent_timer-_exit+fadeout_time, 0, 4);
 	}
 
-	fill(urgent_color, opacity);
 	textAlign(CENTER);
-	textSize(pick_big_font_size(string, _delay));
-	text(string, x+x_distort, y);
+	fill(color, opacity);
+	textSize(47);
+	text(string, correct_x(string,x+x_distort), y);
 	
 }
 
-void pick_big_font_size(String s, int _delay) {
+
+
+
+color[] pick_urgents_colors() {
+	urg_col = new color[3];
+	for (int i = 0; i < 3; i++) {
+		if (cur_col == urgents_palette.length)
+			cur_col=0;
+		else		
+			urg_col[i] = urgents_palette[cur_col];
 		
-	if (s.length > 30)
-		return 18;
-	return 26;
+		cur_col++;
+	}
+	return urg_col;
 }
 
 
@@ -210,6 +247,24 @@ void pick_big_font_size(String s, int _delay) {
 
 
 
+
+
+
+
+
+float correct_x(String s, float x) {
+  int padding = 100; 
+  
+  float ww = textWidth(s);
+
+  if (x - ww/2 < 0)
+    return  ww/2 + padding;
+  
+  if (x + ww/2 > screenWidth)
+    return screenWidth - ww/2 - padding;
+  
+  return x;
+}  
 
 
 
@@ -283,8 +338,7 @@ ArrayList shuffle(ArrayList list) {
   return list;
 }
 
-	String truncate (String s) {
-		int max_chars = 46;  // the maximum chars to be displayed in scrolling view
+	String truncate (String s, int max_chars) {
 		if (s.length > max_chars) {
 			return s.substring(0,max_chars) + "...";
 		}
