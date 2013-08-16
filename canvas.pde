@@ -6,7 +6,8 @@ String current_urgents[];
 int last_urgent = 0;
 float urgent_count = 0;
 
-/* @pjs font="OpenSans-Regular.ttf", font="Miso.otf"*/
+/* @pjs font="css/miso.ttf, OpenSans-Regular.ttf"; */
+
 color bg_color = color(255);
 color scroll_color = color(125);
 int scroll_speed = .5;
@@ -21,7 +22,10 @@ color[] urgents_palette = {
 	color(42,211,232),
 	color(97,147,255),
 	color(172,99,232),
-	color(255,55,146)
+	color(255,55,146),
+	color(255,109,65),
+	color(232,172,72),
+	color(69,255,44)
 };
 
 // for below - see pick_urgents_colors()
@@ -34,7 +38,7 @@ PFont regular, miso;
 
 
 
-
+bool dark_mode = 0;
 
 
 
@@ -63,7 +67,7 @@ void setup()
 void draw() {
 
 	background(bg_color);
-	pad = screenWidth*.48;
+	pad = screenWidth*.38;
 
 
   // scroll tasks down side	
@@ -120,7 +124,22 @@ public class Task {
 
 
 
+void toggleColors() {
 
+	dark_mode = !dark_mode;
+
+	if (dark_mode) {
+		bg_color = color(24);
+		scroll_color = color(100);
+		urgent_text_opacity = 160;
+	}
+
+	else {	
+		bg_color = color(255);
+		scroll_color = color(125);
+		urgent_text_opacity = 128;
+	}	
+}
 
 
 
@@ -155,12 +174,13 @@ void draw_urgent_tasks() {
 
 
 	// switches in between two configurations for the x points
+	int axis_offset = min(xmid*.3, 100);
 	if (flip %2) {
-		float x1 = xmid - midpoint(xmid);
-		float x2 = xmid + midpoint(xmid);
+		float x1 = xmid - axis_offset;
+		float x2 = xmid + axis_offset;
 	} else {
-		float x1 = xmid + midpoint(xmid);
-		float x2 = xmid - midpoint(xmid);
+		float x1 = xmid + axis_offset;
+		float x2 = xmid - axis_offset;
 	} 
 
 	// get the y points for each
@@ -230,15 +250,19 @@ void draw_big_text(String string, int x, int y, int _delay, int _exit, color col
 
 
 color[] pick_urgents_colors() {
+
 	urg_col = new color[3];
+
 	for (int i = 0; i < 3; i++) {
+
 		if (cur_col == urgents_palette.length)
 			cur_col=0;
-		else		
-			urg_col[i] = urgents_palette[cur_col];
-		
+
+		urg_col[i] = urgents_palette[cur_col];
+	
 		cur_col++;
 	}
+
 	return urg_col;
 }
 

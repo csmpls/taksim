@@ -21,8 +21,8 @@
   		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 		<script src="http://cloud.github.com/downloads/processing-js/processing-js/processing-1.4.1.js"></script>
 		<script type="text/javascript" src="http://www.myersdaily.org/joseph/javascript/md5.js"></script>
-		<script type="text/javascript" src="rtm.js"></script>
-		<script src="meny.min.js"></script>
+		<script type="text/javascript" src="js/rtm.js"></script>
+		<script type="text/javascript" src="js/meny.min.js"></script>
 
 		<script type="text/javascript">
 
@@ -37,6 +37,7 @@
 
 				$('#taskcanvas').hide();
 				$('.meny-arrow').hide();
+				$('#splashpane').hide();
 
 				window.rtm = new RememberTheMilk(api_key, api_secret, 'delete');
 
@@ -69,52 +70,34 @@
 
 			var loadLists = function(){
 				$('#authpane').hide();
-				$('#taskcanvas').show();
+				$('#splashpane').show();
 				$('.meny-arrow').show();
 
 
-				// Create an instance of Meny
+				// meny by hakim.se
 			var meny = Meny.create({
-				// The element that will be animated in from off screen
 				menuElement: document.querySelector( '.lists' ),
-
-				// The contents that gets pushed aside while Meny is active
 				contentsElement: document.querySelector( '.contents' ),
-
-				// [optional] The alignment of the menu (top/right/bottom/left)
 				position: Meny.getQuery().p || 'top',
-
-				// [optional] The height of the menu (when using top/bottom position)
 				height: 200,
-
-				// [optional] The width of the menu (when using left/right position)
 				width: 260,
-
-				// [optional] Distance from mouse (in pixels) when menu should open
 				threshold: 40,
-
-				// [optional] Use mouse movement to automatically open/close
 				mouse: true,
-
-				// [optional] Use touch swipe events to open/close
 				touch: true
 			});
 
-			// API Methods:
-			// meny.open();
-			// meny.close();
-			// meny.isOpen();
+			//keypress for fullscreen and color change
+			document.addEventListener('keydown', function(event) {
+			if (event.keyCode == 70) {
+			    launchFullScreen(document.documentElement);
 
-			// Events:
-			// meny.addEventListener( 'open', function(){ console.log( 'open' ); } );
-			// meny.addEventListener( 'close', function(){ console.log( 'close' ); } );
-
-			// Embed an iframe if a URL is passed in
-			if( Meny.getQuery().u && Meny.getQuery().u.match( /^http/gi ) ) {
-				var contents = document.querySelector( '.contents' );
-				contents.style.padding = '0px';
-				contents.innerHTML = '<div class="cover"></div><iframe src="'+ Meny.getQuery().u +'" style="width: 100%; height: 100%; border: 0; position: absolute;"></iframe>';
 			}
+			else if (event.keyCode == 67) {
+			   var pjs = Processing.getInstanceById("taskcanvas"); 
+			   pjs.toggleColors();
+			}
+			}, true);
+
 				
 				rtm.get('rtm.lists.getList', function(resp){
 					$.each(resp.rsp.lists.list, function(index, list){
@@ -125,6 +108,11 @@
 					});
 
 					$('button.list').click(function(){
+						
+						$('#taskcanvas').show();
+						$('.splashpane').hide();
+						$('.meny-arrow').hide();
+
 						$('#tasks').html('Loading...');
 						var listId = $(this).data('id');
 
@@ -155,6 +143,18 @@
 					})
 				});
 			}
+
+
+			// Find the right method, call on correct element
+			function launchFullScreen(element) {
+			  if(element.requestFullScreen) {
+			    element.requestFullScreen();
+			  } else if(element.mozRequestFullScreen) {
+			    element.mozRequestFullScreen();
+			  } else if(element.webkitRequestFullScreen) {
+			    element.webkitRequestFullScreen();
+			  }
+			}
 			</script>
 </script>
 
@@ -163,15 +163,26 @@
 
 <div class="lists" id="lists">
 
+<div class="instructions">Press F for fullscreen. C toggles colors.</div>
+
 </div>
 
-<div class="meny-arrow"></div>
+<div class="meny-arrow"></div> 
  
 
 <div class = "contents">
 
 	<div class = "authpane" id = "authpane">
+		<h1>TAKSIM</h1>
+		<p>Taksim is an ambient visualizer for your RememberTheMilk lists. Hand-rolled by <a href="http://cosmopol.is">Nick Merrill</a>, idea from necessity by <a href="http://www.thesupply.com">TheSupply</a>.</p> 
 		<button id="auth" disabled="disabled">Login via Remember The Milk!</button>
+	</div>
+
+	<div class = "splashpane" id = "splashpane">
+		<div class = "splashnotice">
+			<h1> &uarr; </h1>
+			<div class ="desc">Pull down the menu to pick a list.</div> 
+		</div>
 	</div>
  
  <canvas id="taskcanvas" width="800px" height="300" data-processing-sources="canvas.pde" ></canvas>
