@@ -67,7 +67,7 @@ void setup()
 void draw() {
 
 	background(bg_color);
-	pad = screenWidth*.38;
+	pad = screenWidth*.42;
 
 
   // scroll tasks down side	
